@@ -6,5 +6,13 @@ __pycache__/
 # C extensions
 *.so
 
-# Envrioments
-pi_scanner/venv
+# Envs
+**/.env
+
+# virtualenv
+pi_scanner/bin/
+pi_scanner/lib/
+pi_scanner/pyvenv.cfg
+
+# Certs
+*.pem
