@@ -10,9 +10,8 @@ __pycache__/
 **/.env
 
 # virtualenv
-pi_scanner/bin/
-pi_scanner/lib/
-pi_scanner/pyvenv.cfg
+pi_scanner/.venv/
+cloud_function/.venv/
 
 # Certs
 *.pem
