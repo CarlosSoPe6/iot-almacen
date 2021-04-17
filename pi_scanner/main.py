@@ -3,6 +3,17 @@
 import config
 import json
 from mqtt_client import MQTTClient
+import pi_scanner
+
+async def run(client):
+    records = await pi_scanner.run(client)
+    for record in records:
+        message = {
+            'mac_address': record[0],
+            'rssi': record[1],
+            'uuid': record[2]
+        }
+        client.publish("/devices/{}/events".format(config.device_id), json.dumps(message), qos=0)
 
 def main():
     client = MQTTClient(
@@ -16,15 +27,10 @@ def main():
         mqtt_bridge_hostname=config.mqtt_bridge_hostname,
         mqtt_bridge_port=config.mqtt_bridge_port
     )
-    message = {
-        'mac_address': 'FF:FF:44:46:5F:47',
-        'uuid': '123456789',
-        'rssi': -10
-    }
     client.loop()
-    client.publish("/devices/{}/events".format(config.device_id), json.dumps(message), qos=0)
-    while True:
-        pass
+    loop = asyncio.get_event_loop()
+    while True: 
+        loop.run_until_complete(run(client))
 
 if __name__ == '__main__':
     main()
