@@ -33,7 +33,10 @@ def insert_log(beacon, snap_id, now):
 
 def update_becon(device_id, message, now):
     collection = db.collection('beacons')
-    snap = collection.where('macAddress', '==', message['macAddress']).get()[0]
+    snap = collection.where('macAddress', '==', message['macAddress']).get()
+    if len(snap) == 0:
+        return
+    snap = snap[0]
     snap_id = snap.id
     snap_dict = snap.to_dict()
     document = collection.document(snap_id)
