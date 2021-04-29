@@ -21,19 +21,32 @@ def event_beacons(event, context):
     update_devicce(device_id, registry_id, now)
     for msg in messages:
         update_becon(device_id, msg, now)
+        
+
+def insert_log(beacon, snap_id, now):
+    collection = db.collection('registros')
+    log_id = f"{now}_{snap_id}"
+    collection.document(log_id).set({
+        'beacon': beacon,
+        'timestamp': now
+    })
 
 def update_becon(device_id, message, now):
     collection = db.collection('beacons')
-    document = collection.document(message['macAddress'])
+    snap = collection.where('macAddress', '==', message['macAddress']).get()[0]
+    snap_id = snap.id
+    snap_dict = snap.to_dict()
+    document = collection.document(snap_id)
     document.update({
+        'isActive': not snap_dict['isActive'],
         'lastRead': now,
         'rssi': message['rssi']
     })
+    insert_log(f"/beacons/{snap_id}", snap_id, now)
 
 def update_devicce(device_id, registry, now):
     collection = db.collection('dispositivos')
-    document = collection.document('rpi-00')
+    document = collection.document(device_id)
     document.update({
         'lastRead': now
     })
-
