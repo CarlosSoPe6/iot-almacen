@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
+import asyncio
 import config
 import json
 from mqtt_client import MQTTClient
 import pi_scanner
 
 async def run(client):
-    records = await pi_scanner.run(client)
+    records = await pi_scanner.run()
     for record in records:
         message = {
             'mac_address': record[0],
