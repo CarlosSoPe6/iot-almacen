@@ -25,29 +25,36 @@ def hello_pubsub(event, context):
     update_becon(device_id, msg, now)
         
 
-def insert_log(beacon, snap_id, now):
-    collection = db.collection('registros')
+def insert_log(beacon, producto, snap_id, now):
+    registros = db.collection('registros')
     log_id = f"{now}_{snap_id}"
-    collection.document(log_id).set({
+    registros.document(log_id).set({
         'beacon': beacon,
+        'producto': producto,
         'timestamp': now
     })
 
 def update_becon(device_id, message, now):
     collection = db.collection('beacons')
-    snap = collection.where('macAddress', '==', message['mac_address']).get()
-    if len(snap) == 0:
+    beacon_snap = collection.where('macAddress', '==', message['mac_address']).get()
+    if len(beacon_snap) == 0:
         return
-    snap = snap[0]
-    snap_id = snap.id
-    snap_dict = snap.to_dict()
-    document = collection.document(snap_id)
-    document.update({
-        'isActive': not snap_dict['isActive'],
+    producto_snap = db.collection('productos').where('BeaconID', '==', message['mac_address']).get()
+    if len(producto_snap) == 0:
+        return
+    beacon_snap = beacon_snap[0]
+    beacon_snap_id = beacon_snap.id
+    beacon_snap_dict = beacon_snap.to_dict()
+    producto_snap = producto_snap[0]
+    producto_snap_id = producto_snap.id
+    beacon = collection.document(beacon_snap_id)
+    producto = db.collection('productos').document(producto_snap_id)
+    beacon.update({
+        'isActive': not beacon_snap_dict['isActive'],
         'lastRead': now,
         'rssi': message['rssi']
     })
-    insert_log(f"/beacons/{snap_id}", snap_id, now)
+    insert_log(beacon, producto, beacon_snap_id, now)
 
 def update_devicce(device_id, registry, now):
     collection = db.collection('dispositivos')
